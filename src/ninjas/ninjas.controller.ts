@@ -22,35 +22,45 @@ export class NinjasController {
   constructor(private readonly ninjasService: NinjasService) {}
 
   @Get()
-  getNinjas(@Query('weapon') weapon: 'shurikens' | 'nunchucks') {
-    return this.ninjasService.getNinjas(weapon);
+  async getNinjas(@Query('weapon') weapon: 'shurikens' | 'nunchucks') {
+    return await this.ninjasService.getNinjas(weapon);
   }
 
   @Get(':id')
-  getOneNinja(@Param('id', ParseIntPipe) id: number) {
+  async getOneNinja(@Param('id') id: string) {
     try {
-      return this.ninjasService.getNinja(id);
+      return await this.ninjasService.getNinja(id);
     } catch (error) {
-      throw new NotFoundException();
+      throw new NotFoundException('Ninja not in dojo...');
     }
   }
 
   @Post()
   @UseGuards(BeltGuard)
-  createNinja(@Body(new ValidationPipe()) createNinjaDto: CreateNinjaDto) {
-    return this.ninjasService.createNinja(createNinjaDto);
+  async createNinja(
+    @Body(new ValidationPipe()) createNinjaDto: CreateNinjaDto,
+  ) {
+    return await this.ninjasService.createNinja(createNinjaDto);
   }
 
   @Put(':id')
-  updateNinja(
-    @Param('id', ParseIntPipe) id: number,
+  async updateNinja(
+    @Param('id') id: string,
     @Body() updateNinjaDto: UpdateNinjaDto,
   ) {
-    return this.ninjasService.updateNinja(+id, updateNinjaDto);
+    try {
+      return await this.ninjasService.updateNinja(id, updateNinjaDto);
+    } catch (error) {
+      throw new NotFoundException('This ninja is not part of our dojo...');
+    }
   }
 
   @Delete(':id')
-  removeNinja(@Param('id', ParseIntPipe) id: number) {
-    return this.ninjasService.removeNinja(id);
+  async removeNinja(@Param('id') id: string) {
+    try {
+      return await this.ninjasService.removeNinja(id);
+    } catch (error) {
+      throw new NotFoundException('Ninja already gone...');
+    }
   }
 }
